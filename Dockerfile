@@ -1,0 +1,27 @@
+FROM php:8.2-apache
+
+# 必要な拡張機能をインストール
+RUN apt-get update && apt-get install -y \
+    git curl zip unzip \
+    libpng-dev libonig-dev libxml2-dev \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+
+# Composerをインストール
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Apacheの設定
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN a2enmod rewrite
+
+# ファイルをコピー
+WORKDIR /var/www/html
+COPY . .
+
+# 依存関係インストール
+RUN composer install --no-dev --optimize-autoloader
+
+# 権限設定
+RUN chown -R www-data:www-data storage bootstrap/cache
+
+EXPOSE 80
