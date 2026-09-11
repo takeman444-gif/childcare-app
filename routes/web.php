@@ -7,7 +7,7 @@ use App\Http\Controllers\ChildController;
 use App\Http\Controllers\VaccinationController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::get('/dashboard', function () {
