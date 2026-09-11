@@ -4,6 +4,7 @@ FROM php:8.4-apache
 RUN apt-get update && apt-get install -y \
     git curl zip unzip \
     libpng-dev libonig-dev libxml2-dev libpq-dev \
+    nodejs npm \
     && docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd
 
 # Composerをインストール
@@ -18,8 +19,11 @@ RUN a2enmod rewrite
 WORKDIR /var/www/html
 COPY . .
 
-# 依存関係インストール
+# PHP依存関係インストール
 RUN composer install --no-dev --optimize-autoloader
+
+# フロントエンドのビルド
+RUN npm install && npm run build
 
 # 権限設定
 RUN chown -R www-data:www-data storage bootstrap/cache
